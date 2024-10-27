@@ -46,17 +46,53 @@ function App() {
     
   } 
 
+  function print_content(event) {
+    console.log("print");
+    
+    const file = document.getElementById("myFile").files[0];
+    const chunck_size = 1024;
+    const chunck_number=Math.ceil(file.size/chunck_size)
+    
+    const reader = new FileReader();
+    reader.onload = ()=> {
+      // console.log(reader.result);
+      setInputValue(reader.result)
+
+
+      for (let i = 0; i < chunck_number; i++) {
+        const start = i*chunck_size;
+        const end = (i + 1) * chunck_size;
+        console.log(reader.result.slice(start, end));
+        
+        console.log("-".repeat(50));
+      
+
+    }
+    };
+    reader.readAsText(file);
+
+    
+    
+
+    
+
+
+
+
+    
+  }
+
  
 
   return (
     <>
       <div>{value}</div>
       <button onClick={() => {send_data(client)}}>send data</button>
-
-      <form>
-      <input type="file" id="myFile" name="filename"/>
-        <input type="submit" reload="false"/>
-      </form>
+      <br></br>
+      {/* <form> */}
+      <input type="file" id="myFile" name="filename" />
+        <input type="submit" onClick={(event)=>print_content(event)} reload="false"/>
+      {/* </form> */}
 
     </>
   );
