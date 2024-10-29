@@ -18,7 +18,8 @@ export default function Receive_file() {
         if (message.destinationName === "temperature") {
             
 
-            console.log(message.payloadString);
+            // console.log(message.payloadString);
+            
             
 
             const jsonMessage = JSON.parse(message.payloadString);
@@ -26,19 +27,25 @@ export default function Receive_file() {
 
             const fileName = jsonMessage.filename;
             const fileType=jsonMessage.fieltype;
-            const fileContent = jsonMessage.filecontent;
+            const decoded_fileContent = atob(jsonMessage.filecontent);
 
+            const value_keys=fileName+"--"+fileType
+            
+            // console.log(value_keys.split("--"));
+            
+            
+            
             console.log("file type : ", fileType);
             
 
             setValue((prevValue) => {
                 const newValue = { ...prevValue };
                 
-                if (fileName in newValue) {
+                if (value_keys in newValue) {
 
-                    newValue[fileName] += fileContent;
+                    newValue[value_keys] += decoded_fileContent;
                 } else {
-                    newValue[fileName] = fileContent;
+                    newValue[value_keys] = decoded_fileContent;
                 }
 
                 // console.log("new value:", newValue);
@@ -69,9 +76,21 @@ export default function Receive_file() {
 
   }, []);
 
-  const downloadFile = (passed_file_name) => {
+  const downloadFile = (passed_file_name,passed_file_type) => {
     const link = document.createElement("a");
-    const file = new Blob([value[passed_file_name]], { type: 'text/plain' });
+
+    const  file_fkn_bytes=value[passed_file_name+"--"+passed_file_type];
+
+    let bytes = new Uint8Array(file_fkn_bytes.length);
+    for (let i = 0; i < bytes.length; i++) {
+      bytes[i] = file_fkn_bytes.charCodeAt(i);
+  }
+  
+
+
+    const file = new Blob([bytes], { type: passed_file_type });
+    console.log(value[passed_file_name+"--"+passed_file_type]);
+    
     link.href = URL.createObjectURL(file);
     link.download = passed_file_name;
     link.click();
@@ -85,7 +104,7 @@ export default function Receive_file() {
             <button onClick={() => {setValue({});console.log("value reset : ", value);
             }}>clear file</button>
             <button onClick={()=>{console.log("value : ", value);}}>show values</button>
-            {Object.keys(value).map((key) => <button onClick={() => downloadFile(key)}>{key}</button>)}
+            {Object.keys(value).map((key) => <button onClick={() => downloadFile(key.split("--")[0],key.split("--")[1])}>{key.split("--")[0]}</button>)}
         </div>
     );
 }

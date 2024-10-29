@@ -44,6 +44,17 @@ export default function Send_file() {
         c.send(message);
     }
 
+    function arraybuffer_to_base64( buffer ) {
+        var binary = '';
+        var bytes = new Uint8Array( buffer );
+        var len = bytes.byteLength;
+        for (var i = 0; i < len; i++) {
+            binary += String.fromCharCode( bytes[ i ] );
+        }
+        return window.btoa( binary );
+    }
+    
+
     function print_content(event) {
         console.log("print");
 
@@ -63,12 +74,16 @@ export default function Send_file() {
                 
                 const end = (i + 1) * chunck_size;
 
-                console.log(reader.result.slice(start, end));
+                const data_to_send=reader.result.slice(start, end)
+
+                // console.log(data_to_send);
                 // var bytes = new Uint8Array(reader.result.slice(start, end));
                 // console.log(bytes);
                 
-
-                send_data(client, file.name,file.type, reader.result.slice(start, end));
+                const encoded_data=arraybuffer_to_base64(data_to_send)
+                console.log(encoded_data);
+                
+                send_data(client, file.name,file.type, encoded_data);
             }
         };
         reader.readAsArrayBuffer(file);
